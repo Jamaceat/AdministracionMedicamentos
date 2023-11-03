@@ -1,4 +1,4 @@
-const controlador = require("./Controllers/Products")
+const productRoutes = require("./routes/ProductRoute")
 const mysql = require("mysql")
 const express = require("express")
 const app = express()
@@ -16,9 +16,7 @@ app.use(
 	})
 )
 
-router.get("/", controlador.list)
-
-app.use(router)
+app.use("/products", productRoutes)
 app.listen(8080, () => {
 	console.log("server running sucessfully")
 })
