@@ -1,4 +1,6 @@
 const productRoutes = require("./routes/ProductRoute")
+const providerRoutes = require("./routes/ProviderRoute")
+
 const mysql = require("mysql")
 const express = require("express")
 const app = express()
@@ -17,6 +19,8 @@ app.use(
 )
 
 app.use("/products", productRoutes)
+app.use("/providers", providerRoutes)
+
 app.listen(8080, () => {
 	console.log("server running sucessfully")
 })
