@@ -1,5 +1,6 @@
 const productRoutes = require("./routes/ProductRoute")
 const providerRoutes = require("./routes/ProviderRoute")
+const receptionRoutes = require("./routes/ReceptionRoute")
 
 const mysql = require("mysql")
 const express = require("express")
@@ -20,18 +21,8 @@ app.use(
 
 app.use("/products", productRoutes)
 app.use("/providers", providerRoutes)
+app.use("/receptions", receptionRoutes)
 
 app.listen(8080, () => {
 	console.log("server running sucessfully")
 })
-
-// })
-
-// connection.query("SELECT * FROM Product", (error, results, fields) => {
-// 	if (error) {
-// 		console.log("error en la consulta", error)
-// 		return
-// 	}
-
-// 	console.log(results, "son los resultados")
-// })

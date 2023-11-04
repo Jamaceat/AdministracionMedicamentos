@@ -1,5 +1,4 @@
 const formater = require("mysql").format
-const reductorVerifier = require("../Utils/FieldVerifier")
 const verifier = require("../Utils/FieldVerifier")
 
 const ProviderController = {}

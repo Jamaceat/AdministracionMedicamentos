@@ -1,8 +1,5 @@
 const formater = require("mysql").format
 
-const productEntity = require("../models/ProductEntity")
-const getAllProducts = require("../services/generalGet")
-
 const ProductController = {}
 
 ProductController.list = async (req, res) => {
