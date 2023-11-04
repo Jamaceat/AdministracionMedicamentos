@@ -8,4 +8,6 @@ productRoutes.delete("/:id", productController.delete)
 
 productRoutes.post("/", productController.create)
 
+productRoutes.put("/", productController.update)
+
 module.exports = productRoutes

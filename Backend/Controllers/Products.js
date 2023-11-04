@@ -1,13 +1,13 @@
 const formater = require("mysql").format
 
-const {format} = require("mysql")
 const productEntity = require("../models/ProductEntity")
 const getAllProducts = require("../services/generalGet")
 
 const ProductController = {}
 
 ProductController.list = async (req, res) => {
-	const query = "SELECT * FROM Product"
+	const query =
+		"SELECT IDCode, Name, Description, State, LaboratoryName FROM Product"
 
 	req.getConnection((err, conn) => {
 		conn.query(query, (error, results) => {
@@ -23,7 +23,7 @@ ProductController.list = async (req, res) => {
 ProductController.create = async (req, res) => {
 	const queryUnprocessed = `INSERT INTO Product(Name,Description,State,LaboratoryName) VALUES(?,?,?,?);`
 	const {Name, Description, State, LaboratoryName} = req.body
-	const queryProcessed = format(queryUnprocessed, [
+	const queryProcessed = formater(queryUnprocessed, [
 		Name,
 		Description,
 		State,
@@ -44,7 +44,7 @@ ProductController.create = async (req, res) => {
 ProductController.getOne = async (req, res) => {
 	const queryUnprocessed = "SELECT * FROM Product WHERE IDCode=?"
 	const IDCode = req.params.id
-	const queryProcessed = format(queryUnprocessed, [IDCode])
+	const queryProcessed = formater(queryUnprocessed, [IDCode])
 	req.getConnection((err, conn) => {
 		conn.query(queryProcessed, (error, results) => {
 			if (error) {
@@ -59,7 +59,7 @@ ProductController.getOne = async (req, res) => {
 ProductController.delete = async (req, res) => {
 	const queryUnprocessed = `DELETE FROM Product WHERE IDCode=?`
 	const IDCode = req.params.id
-	const queryProcessed = format(queryUnprocessed, [IDCode])
+	const queryProcessed = formater(queryUnprocessed, [IDCode])
 	req.getConnection((err, conn) => {
 		conn.query(queryProcessed, (error, results) => {
 			if (error) {
@@ -76,14 +76,22 @@ ProductController.delete = async (req, res) => {
 }
 
 ProductController.update = async (req, res) => {
-	const queryUnprocessed = `INSERT INTO Product(Name,Description,State,LaboratoryName) VALUES(?,?,?,?);`
-	const {Name, Description, State, LaboratoryName} = req.body
-	const queryProcessed = format(queryUnprocessed, [
-		Name,
-		Description,
-		State,
-		LaboratoryName,
-	])
+	const queryUnprocessed = `UPDATE Product SET`
+	const {IDCode, Name, Description, State, LaboratoryName} = req.body
+	const index = ["Name", "Description", "State", "LaboratoryName"]
+	const queryHandler =
+		queryUnprocessed +
+		[Name, Description, State, LaboratoryName].reduce(
+			(acumulado, x, i) =>
+				x
+					? (acumulado += `${acumulado ? "," : ""} \`${index[i]}\` = '${x}'`)
+					: acumulado,
+			""
+		) +
+		" WHERE IDCode=?"
+
+	const queryProcessed = formater(queryHandler, [IDCode])
+	console.log(queryHandler)
 
 	req.getConnection((err, conn) => {
 		conn.query(queryProcessed, (error, results) => {
@@ -91,7 +99,12 @@ ProductController.update = async (req, res) => {
 				res.json(error)
 				return
 			}
-			res.status(201).json({})
+			const affectedRows = results.affectedRows
+			if (affectedRows === 0) {
+				res.status(400).json({message: "bad request, IDCode doesn't exits"})
+			} else {
+				res.status(201).json({affectedRows})
+			}
 		})
 	})
 }
