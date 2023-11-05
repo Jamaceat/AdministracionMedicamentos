@@ -2,6 +2,12 @@
 
 Este proyecto tiene la creacion de una base de datos y su respectivo Backend donde se hara el procesamiento de datos sobre un inventario en medicina, provedores y recepcion.
 
+## Tecnologias utilizadas
+
+- MYSQL
+- Javascript
+  - Express
+
 ## ENDPOINTS
 
 - /products
@@ -26,3 +32,10 @@ Este proyecto tiene la creacion de una base de datos y su respectivo Backend don
   - / - post : crear una recepcion
   - /:id delete : elimina una recepcion
   - / update : actualiza campos de una recepcion
+
+## Ejecucion
+
+Entrar al modulo Backend y correr `npm i` despues que se hayan instalado las dependencias correr `npm run develop`
+
+- necesitara crear un archivo .env con el `password` para el usuario con acceso a la base de datos en cada maquina respectivamente
+- necesitara de algun programa como postman para probar la API
