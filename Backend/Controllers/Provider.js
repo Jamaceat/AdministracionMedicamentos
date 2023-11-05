@@ -3,6 +3,13 @@ const verifier = require("../Utils/FieldVerifier")
 
 const ProviderController = {}
 
+const possibleIDType = [
+	"Cedula",
+	"NIT",
+	"Cedula de Extranjeria",
+	"NIT de Extranjeria",
+]
+
 ProviderController.list = async (req, res) => {
 	const query =
 		"SELECT IDType, ID, Name, Address, ContactName, ContactNumber FROM Provider"
@@ -21,11 +28,15 @@ ProviderController.list = async (req, res) => {
 ProviderController.create = async (req, res) => {
 	const queryUnprocessed = `INSERT INTO Provider(IDType, ID, Name, Address, ContactName, ContactNumber) VALUES(?,?,?,?,?,?);`
 	const {IDType, ID, Name, Address, ContactName, ContactNumber} = req.body
-	const valid = [IDType, ID, Name, Address, ContactName, ContactNumber].reduce(
+	let valid = [IDType, ID, Name, Address, ContactName, ContactNumber].reduce(
 		verifier,
 		false
 	)
-	console.log("Is valid :", valid)
+	valid = possibleIDType.reduce(
+		(isValid, x) => (IDType === x ? true : isValid),
+		false
+	)
+
 	const queryProcessed = formater(queryUnprocessed, [
 		IDType,
 		ID,
@@ -95,11 +106,14 @@ ProviderController.delete = async (req, res) => {
 ProviderController.update = async (req, res) => {
 	const queryUnprocessed = `UPDATE Provider SET`
 	const {IDType, ID, Name, Address, ContactName, ContactNumber} = req.body
-	const valid = [IDType, ID, Name, Address, ContactName, ContactNumber].reduce(
+	let valid = [IDType, ID, Name, Address, ContactName, ContactNumber].reduce(
 		verifier,
 		false
 	)
-
+	valid = possibleIDType.reduce(
+		(isValid, x) => (IDType === x ? true : isValid),
+		false
+	)
 	if (valid) {
 		const index = ["Name", "Address", "ContactName", "ContactNumber"]
 		const queryHandler =
@@ -114,7 +128,6 @@ ProviderController.update = async (req, res) => {
 			" WHERE IDType=? and ID=?"
 
 		const queryProcessed = formater(queryHandler, [IDType, ID])
-		console.log(queryHandler)
 
 		req.getConnection((err, conn) => {
 			conn.query(queryProcessed, (error, results) => {

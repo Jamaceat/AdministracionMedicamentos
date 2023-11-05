@@ -1,6 +1,8 @@
 const formater = require("mysql").format
-
+const verifier = require("../Utils/FieldVerifier")
 const ProductController = {}
+
+const possibleState = ["Activo", "Inactivo"]
 
 ProductController.list = async (req, res) => {
 	const query =
@@ -26,20 +28,30 @@ ProductController.create = async (req, res) => {
 		State,
 		LaboratoryName,
 	])
+	let valid = [Name, Description, State, LaboratoryName].reduce(verifier, false)
+	valid = possibleState.reduce(
+		(isValid, x) => (State === x ? true : isValid),
+		false
+	)
 
-	req.getConnection((err, conn) => {
-		conn.query(queryProcessed, (error, results) => {
-			if (error) {
-				res.json(error)
-				return
-			}
-			res.status(201).json({})
+	if (valid) {
+		req.getConnection((err, conn) => {
+			conn.query(queryProcessed, (error, results) => {
+				if (error) {
+					res.json(error)
+					return
+				}
+				res.status(201).json({})
+			})
 		})
-	})
+	} else {
+		res.status(400).json({message: "invalid request"})
+	}
 }
 
 ProductController.getOne = async (req, res) => {
-	const queryUnprocessed = "SELECT * FROM Product WHERE IDCode=?"
+	const queryUnprocessed =
+		"SELECT IDCode, Name, Description, State, LaboratoryName FROM Product WHERE IDCode=?"
 	const IDCode = req.params.id
 	const queryProcessed = formater(queryUnprocessed, [IDCode])
 	req.getConnection((err, conn) => {
@@ -75,35 +87,45 @@ ProductController.delete = async (req, res) => {
 ProductController.update = async (req, res) => {
 	const queryUnprocessed = `UPDATE Product SET`
 	const {IDCode, Name, Description, State, LaboratoryName} = req.body
-	const index = ["Name", "Description", "State", "LaboratoryName"]
-	const queryHandler =
-		queryUnprocessed +
-		[Name, Description, State, LaboratoryName].reduce(
-			(acumulado, x, i) =>
-				x
-					? (acumulado += `${acumulado ? "," : ""} \`${index[i]}\` = '${x}'`)
-					: acumulado,
-			""
-		) +
-		" WHERE IDCode=?"
+	let valid = true
+	if (State) {
+		valid = possibleState.reduce(
+			(isValid, x) => (State === x ? true : isValid),
+			false
+		)
+	}
+	if (valid) {
+		const index = ["Name", "Description", "State", "LaboratoryName"]
+		const queryHandler =
+			queryUnprocessed +
+			[Name, Description, State, LaboratoryName].reduce(
+				(acumulado, x, i) =>
+					x
+						? (acumulado += `${acumulado ? "," : ""} \`${index[i]}\` = '${x}'`)
+						: acumulado,
+				""
+			) +
+			" WHERE IDCode=?"
 
-	const queryProcessed = formater(queryHandler, [IDCode])
-	console.log(queryHandler)
+		const queryProcessed = formater(queryHandler, [IDCode])
 
-	req.getConnection((err, conn) => {
-		conn.query(queryProcessed, (error, results) => {
-			if (error) {
-				res.json(error)
-				return
-			}
-			const affectedRows = results.affectedRows
-			if (affectedRows === 0) {
-				res.status(400).json({message: "bad request, IDCode doesn't exits"})
-			} else {
-				res.status(201).json({affectedRows})
-			}
+		req.getConnection((err, conn) => {
+			conn.query(queryProcessed, (error, results) => {
+				if (error) {
+					res.json(error)
+					return
+				}
+				const affectedRows = results.affectedRows
+				if (affectedRows === 0) {
+					res.status(400).json({message: "bad request, IDCode doesn't exits"})
+				} else {
+					res.status(201).json({affectedRows})
+				}
+			})
 		})
-	})
+	} else {
+		res.status(400).json({message: "invalid request, bad status"})
+	}
 }
 
 module.exports = ProductController
