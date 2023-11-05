@@ -2,6 +2,7 @@ const productRoutes = require("./routes/ProductRoute")
 const providerRoutes = require("./routes/ProviderRoute")
 const receptionRoutes = require("./routes/ReceptionRoute")
 
+const credentials = require("dotenv").config()
 const mysql = require("mysql")
 const express = require("express")
 const app = express()
@@ -14,7 +15,7 @@ app.use(
 	myconnection(mysql, {
 		host: "localhost",
 		user: "root",
-		password: "jho014%",
+		password: process.env.PASSWORD,
 		database: "InventarioMedPro",
 	})
 )
